@@ -4,6 +4,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+
 class User extends Authenticatable implements JWTSubject
 {
  use Notifiable;
@@ -16,7 +17,9 @@ class User extends Authenticatable implements JWTSubject
  protected $primaryKey = 'id_user';
  protected $fillable = [
  'nama_user', 'username', 'password', 'role',
+
  ];
+ public $timestamps= false;
  /**
  * The attributes that should be hidden for arrays.
  *
