@@ -10,5 +10,9 @@ class MemberModel extends Model
     //use HasFactory;
     protected $table = 'member';
 
+    protected $primaryKey = 'id_member';
+    public $timestamps = false;
+
     protected $fillable = ['nama_member','alamat','jenis_kelamin','tlp'];
+
 }

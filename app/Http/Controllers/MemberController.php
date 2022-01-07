@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Models\MemberModels;
+use App\Models\MemberModel;
 
 class MemberController extends Controller
 {
@@ -21,7 +21,7 @@ class MemberController extends Controller
         return response()->json($validator->errors());
     }
 
-    $member = new member();
+    $member =new MemberModel();
     $member->nama_member = $request->nama_member;
     $member->alamat = $request->alamat;
     $member->jenis_kelamin = $request->jenis_kelamin;
@@ -29,24 +29,24 @@ class MemberController extends Controller
 
     $member->save();
 
-    $data = Member::where('id_member','=',$member->id_member)->first();
+    $data = MemberModel::where('id_member','=', $member->id_member)->first();
 
     return response()->json([
         'message' => 'Data member berhasil diinput',
-        'data' => $data     
+        'data' => $data   
     ]);
 }
 
 
     public function getAll(){
-        $data['count']= Member::count();
+        $data['count']= MemberModel::count();
 
-        $data['member']= Member::get();
+        $data['member']= MemberModel::get();
 
         return response()->json(['data' => $data]);
     }
-    public function getById($id){
-        $data['member'] = Member::where('id_member','=', $id_member)->get();
+    public function getById($id_member){
+        $data['member'] = MemberModel::where('id_member','=', $id_member)->get();
 
         return response()->json(['data'=>$data]);
     }
@@ -64,7 +64,7 @@ class MemberController extends Controller
             return response()->json($validator->errors());
         }
     
-        $member = Member::where('id_member','=', $id_member)->first();
+        $member = MemberModel::where('id_member','=', $id_member)->first();
         $member->nama_member = $request->nama_member;
         $member->alamat = $request->alamat;
         $member->jenis_kelamin = $request->jenis_kelamin;
@@ -79,7 +79,7 @@ class MemberController extends Controller
 
     public function delete($id_member)
     {
-        $delete = Member::where('id_member','=',$id_member)->delete();
+        $delete = MemberModel::where('id_member','=',$id_member)->delete();
 
         if($delete) {
             return response()->json(['message'=>'Berhasil dihapus']);
