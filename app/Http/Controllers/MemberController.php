@@ -39,11 +39,13 @@ class MemberController extends Controller
 
 
     public function getAll(){
-        $data['count']= MemberModel::count();
+        // $data['count']= MemberModel::count();
 
-        $data['member']= MemberModel::get();
+        // $data['member']= MemberModel::get();
 
-        return response()->json(['data' => $data]);
+        // return response()->json(['data' => $data]);
+        $data=MemberModel::get();
+        return response()->json($data);
     }
     public function getById($id_member){
         $data['member'] = MemberModel::where('id_member','=', $id_member)->get();
