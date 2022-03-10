@@ -39,20 +39,14 @@ class PaketController extends Controller
     public function getAll()
     {
         $data = PaketModel::get();
-        return response()->json([
-            'success' => true,
-            'data' => $data
-        ]);
+        return response()->json($data);
     }
 
     public function getById($id_paket)
     {
-        $data = PaketModel::where('id_paket', '=', $id_paket)->first();
+        $data = PaketModel::where('id_paket', '=', $id_paket)->get();
         
-        return response()->json([
-            'success' => true,
-            'data' => $data
-        ]);
+        return response()->json($data);
     }
 
     public function update(Request $request, $id_paket)

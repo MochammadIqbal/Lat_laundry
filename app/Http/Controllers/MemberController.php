@@ -48,9 +48,9 @@ class MemberController extends Controller
         return response()->json($data);
     }
     public function getById($id_member){
-        $data['member'] = MemberModel::where('id_member','=', $id_member)->get();
+        $data= MemberModel::where('id_member','=', $id_member)->get();
 
-        return response()->json(['data'=>$data]);
+        return response()->json($data);
     }
 
     public function update(Request $request, $id_member)

@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\PaketController;
+use App\Http\Controllers\TransaksiController;
+
 
 
 
@@ -43,4 +45,17 @@ Route::group(['middleware' => ['jwt.verify:admin, kasir']], function() {
     Route::get('member/{id_member}', [MemberController::class, 'getById']);
     Route::put('member/{id_member}', [MemberController::class, 'update']);
     Route::delete('member/{id_member}', [MemberController::class, 'delete']);
+
+    //TRANSAKSI
+    Route::post('transaksi', [TransaksiController::class, 'store']);
+    Route::get('transaksi/{id}', [TransaksiController::class, 'getById']);
+    Route::get('transaksi', [TransaksiController::class, 'getAll']);
+    Route::post('transaksi/{id}', [TransaksiController::class, 'update']);
+
+    //DETAIL TRANSAKSI
+    Route::post('transaksi/detil/tambah', [DetilTransaksiController::class, 'store']);
+    Route::get('transaksi/detil/{id}', [DetilTransaksiController::class, 'getById']);
+    Route::post('transaksi/status/{id}', [TransaksiController::class, 'changeStatus']);
+    Route::post('transaksi/bayar/{id}', [TransaksiController::class, 'bayar']);
+    Route::get('transaksi/total/{id}', [DetilTransaksiController::class, 'getTotal']);
 });
