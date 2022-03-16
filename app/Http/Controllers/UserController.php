@@ -14,23 +14,25 @@ class UserController extends Controller
 {
     public function store(Request $request)
     {$validator = Validator::make($request->all(),[
-        'nama_user'=>'required|string',
-        'username'=>'required',
-        'password'=>'required|min:6',
-        'role'=>'required'
+        'nama' => 'required',
+        'username' => 'required',
+        'password' => 'required|string|min:6',
+        'role' => 'required',
+        'id_outlet' => 'required'
     ]);
     if ($validator->fails()){
         return response()->json($validator->errors());
     }
-    $user = new User();
-    $user->nama_user = $request->nama_user;
-    $user->username = $request->username;
-    $user->password = Hash::make($request->password);
-    $user->role = $request->role;
+        $user = new User();
+        $user->nama     = $request->nama;
+        $user->username = $request->username;
+        $user->password = Hash::make($request->password);
+        $user->role     = $request->role;
+        $user->id_outlet = $request->id_outlet;
 
     $user->save();
     
-    return response()->json(['message'=>'berhasil diinput']);
+    return response()->json(['message'=>'berhasil di input']);
     }
 
     

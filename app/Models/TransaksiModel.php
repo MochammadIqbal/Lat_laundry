@@ -10,8 +10,7 @@ class TransaksiModel extends Model
     protected $primaryKey = 'id_transaksi';
     protected $table = 'transaksi';
 
-    protected $fillable = ['id_member','tgl','batas_waktu','tgl_bayar','status','dibayar','id_user'];
-    public $timestamps = false;
+    protected $fillable = ['id_member','tgl_order','batas_waktu','tgl_bayar','status','dibayar','id','id_outlet '];
 
     // public function detail()
     // {

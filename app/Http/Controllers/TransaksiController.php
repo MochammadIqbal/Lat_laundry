@@ -15,11 +15,11 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TransaksiController extends Controller
 {
-    public $users;
+    public $user;
 
     public function __construct()
     {
-        $this->users = JWTAuth::parseToken()->authenticate();
+        $this->user = JWTAuth::parseToken()->authenticate();
     }
 
     public function store(Request $request)
@@ -33,14 +33,14 @@ class TransaksiController extends Controller
         }
 
         $transaksi = new TransaksiModel();
+        // $transaksi->id_member = $this->id_member;
         $transaksi->id_member = $request->id_member;
-        $transaksi->tgl = Carbon::now();
+        $transaksi->tgl_order = Carbon::now();
         $transaksi->batas_waktu = Carbon::now()->addDays(3);
-        // $transaksi->tgl_bayar = Carbon::now();
         $transaksi->status = 'baru';
-        $transaksi->dibayar = $request->dibayar;
-        //$transaksi->id = $this->user->id;
-        $transaksi->id_user = $this->users->id_user;
+        $transaksi->dibayar = 'belum dibayar';
+        $transaksi->subtotal = NULL;
+        $transaksi->id = $this->user->id;
 
         $transaksi->save();
 
@@ -51,26 +51,25 @@ class TransaksiController extends Controller
     public function getAll()
     {
         $data = DB::table('transaksi')->join('member', 'transaksi.id_member', '=', 'member.id_member')
-                    ->select('transaksi.*', 'member.nama_member')
+                    ->select('transaksi.*', 'member.nama')
                     ->get();
                     
-        return response()->json(['success' => true, 'data' => $data]);
+        return response()->json($data);
     }
     
     public function update($id, Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id_member' => 'required'
+            'id_member' => 'required',
         ]);
 
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return response()->json($validator->errors());
         }
 
-        $transaksi = TransaksiModel::where('id_transaksi', '=', $id)->first();
-        $transaksi->id_member = $request->id_member;
+        $transaksi = TransaksiModel::find($id);
 
-        $transaksi->save();
+        $transaksi->update($request->all());
 
         return response()->json(['message' => 'Transaksi berhasil diubah']);
     }
@@ -79,7 +78,7 @@ class TransaksiController extends Controller
     {
         $data = TransaksiModel::where('id_transaksi', '=', $id)->first();  
         $data = DB::table('transaksi')->join('member', 'transaksi.id_member', '=', 'member.id_member')      
-                                      ->select('transaksi.*', 'member.nama_member')
+                                      ->select('transaksi.*', 'member.nama')
                                       ->where('transaksi.id_transaksi', '=', $id)
                                       ->first();
         return response()->json($data);
@@ -90,17 +89,17 @@ class TransaksiController extends Controller
         $validator = Validator::make($request->all(), [
             'status' => 'required'
         ]);
-        
-        if($validator->fails()) {
+
+        if ($validator->fails()) {
             return response()->json($validator->errors());
         }
-        
-        $transaksi = TransaksiModel::where('id', '=', $id)->first();
+
+        $transaksi = TransaksiModel::where('id_transaksi', '=', $id)->first();
         $transaksi->status = $request->status;
-        
+
         $transaksi->save();
-        
-        return response()->json(['message' => 'Status berhasil diubah']);
+
+        return response()->json(['message' => 'Status berhasil diubah', $transaksi]);
     }
     
     public function bayar($id)
@@ -109,7 +108,7 @@ class TransaksiController extends Controller
         $total = DetilTransaksiModel::where('id_transaksi', $id)->sum('subtotal');
 
         $transaksi->tgl_bayar = Carbon::now();
-        $transaksi->status = "Diambil";
+        $transaksi->status = "diambil";
         $transaksi->dibayar = "dibayar";
         $transaksi->total_bayar = $total;        
         
@@ -132,8 +131,8 @@ class TransaksiController extends Controller
         $tahun = $request->tahun;
         $bulan = $request->bulan;
         
-        $data = DB::table('transaksi')->join('member', 'transaksi.id_member', '=', 'member.id')
-                    ->select('transaksi.id','transaksi.tgl_order','transaksi.tgl_bayar','transaksi.total_bayar', 'member.nama')
+        $data = DB::table('transaksi')->join('member', 'transaksi.id_member', '=', 'member.id_member')
+                    ->select('transaksi.id_transaksi','transaksi.tgl_order','transaksi.tgl_bayar','transaksi.subtotal', 'member.nama')
                     ->whereYear('tgl_order', '=' , $tahun)
                     ->whereMonth('tgl_order', '=', $bulan)
                     ->get();

@@ -3,12 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\DetilTransaksiModel;
-use App\Models\Paket;
 use App\Models\PaketModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-// use JWTAuth;
+//use JWTAuth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 
@@ -32,20 +31,20 @@ class DetilTransaksiController extends Controller
             return response()->json($validator->errors());
         }
         
-        $detil = new DetilTransaksiModel();
-        $detil->id_transaksi = $request->id_transaksi;
-        $detil->id_paket = $request->id_paket;
+        $detail = new DetilTransaksiModel();
+        $detail->id_transaksi = $request->id_transaksi;
+        $detail->id_paket = $request->id_paket;
 
         //GET HARGA PAKET
-        $paket = PaketModel::where('id', '=', $detil->id_paket)->first();
+        $paket = PaketModel::where('id_paket', '=', $detail->id_paket)->first();
         $harga = $paket->harga;
 
-        $detil->quantity = $request->quantity;
-        $detil->subtotal = $detil->quantity * $harga;
+        $detail->quantity = $request->quantity;
+        $detail->subtotal = $detail->quantity * $harga;
 
-        $detil->save();
+        $detail->save();
 
-        $data = DetilTransaksiModel::where('id', '=', $detil->id)->first();
+        $data = DetilTransaksiModel::where('id_detail_transaksi', '=', $detail->id_detail_transaksi)->first();
 
         return response()->json(['message' => 'Berhasil tambah detil transaksi', 'data' => $data]);
     }
@@ -53,17 +52,16 @@ class DetilTransaksiController extends Controller
     public function getById($id)
     {
         //untuk ambil detil dari transaksi tertentu
-
-        $data = DB::table('detil_transaksi')->join('paket', 'detil_transaksi.id_paket', 'paket.id')
-                                            ->select('detil_transaksi.*', 'paket.jenis')
-                                            ->where('detil_transaksi.id_transaksi', '=', $id)
+        $data = DB::table('detail_transaksi')->join('paket', 'detail_transaksi.id_paket', 'paket.id_paket')
+                                            ->select('detail_transaksi.*', 'paket.jenis')
+                                            ->where('detail_transaksi.id_transaksi', '=', $id)
                                             ->get();
-        return response()->json($data);                        
-    }
+                                            return response()->json($data);
+}
 
-    public function getTotal($id)
+    public function getTotal($id_detail)
     {
-        $total = DetilTransaksiModel::where('id_transaksi', $id)->sum('subtotal');
+        $total = DetilTransaksiModel::where('id_detail_transaksi', $id_detail)->sum('subtotal');
         
         return response()->json([
             'total' => $total

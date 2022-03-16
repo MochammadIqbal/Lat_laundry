@@ -11,7 +11,7 @@ class MemberController extends Controller
 
     public function store(Request $request){
     $validator = Validator::make($request->all(),[
-        'nama_member' => 'required|string',
+        'nama' => 'required|string',
         'alamat' => 'required|string',
         'jenis_kelamin' => 'required|string',
         'tlp' => 'required|string',
@@ -22,7 +22,7 @@ class MemberController extends Controller
     }
 
     $member =new MemberModel();
-    $member->nama_member = $request->nama_member;
+    $member->nama = $request->nama;
     $member->alamat = $request->alamat;
     $member->jenis_kelamin = $request->jenis_kelamin;
     $member->tlp = $request->tlp;
@@ -56,7 +56,7 @@ class MemberController extends Controller
     public function update(Request $request, $id_member)
     {
         $validator = Validator::make($request->all(),[
-            'nama_member' => 'required|string',
+            'nama' => 'required|string',
             'alamat' => 'required|string',
             'jenis_kelamin' => 'required|string',
             'tlp' => 'required|string',
@@ -67,7 +67,7 @@ class MemberController extends Controller
         }
     
         $member = MemberModel::where('id_member','=', $id_member)->first();
-        $member->nama_member = $request->nama_member;
+        $member->nama = $request->nama;
         $member->alamat = $request->alamat;
         $member->jenis_kelamin = $request->jenis_kelamin;
         $member->tlp = $request->tlp;
