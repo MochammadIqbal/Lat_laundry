@@ -31,6 +31,7 @@ class PaketController extends Controller
 
         $data = PaketModel::where('id_paket', '=', $paket->id_paket)->first();
         return response()->json([
+            'success' => true,
             'message' => 'Data paket berhasil ditambahkan',
             'data' => $data
         ]);
@@ -42,9 +43,9 @@ class PaketController extends Controller
         return response()->json($data);
     }
 
-    public function getById($id_paket)
+    public function getById($id)
     {
-        $data = PaketModel::where('id_paket', '=', $id_paket)->get();
+        $data = PaketModel::where('id_paket', $id)->first();
         
         return response()->json($data);
     }
@@ -79,12 +80,12 @@ class PaketController extends Controller
         if($delete) {
             return response()->json([
                 'success' => true,
-                'message' => "Data outlet berhasil dihapus"
+                'message' => "Data paket berhasil dihapus"
             ]);
         } else {
             return response()->json([
                 'success' => false,
-                'message' => "Data outlet gagal dihapus"
+                'message' => "Data paket gagal dihapus"
             ]);
         }
     }

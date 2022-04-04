@@ -1,101 +1,167 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
-use Tymon\JWTAuth\Exceptions\TokenExpiredException;
-use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Illuminate\Support\Facades\DB;
+
 
 class UserController extends Controller
 {
     public function store(Request $request)
-    {$validator = Validator::make($request->all(),[
-        'nama' => 'required',
-        'username' => 'required',
-        'password' => 'required|string|min:6',
-        'role' => 'required',
-        'id_outlet' => 'required'
-    ]);
-    if ($validator->fails()){
-        return response()->json($validator->errors());
-    }
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'username' => 'required',
+            'password' => 'required|string|min:6',
+            'role' => 'required',
+            'id_outlet' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
         $user = new User();
-        $user->nama     = $request->nama;
+        $user->name     = $request->name;
         $user->username = $request->username;
         $user->password = Hash::make($request->password);
         $user->role     = $request->role;
         $user->id_outlet = $request->id_outlet;
 
-    $user->save();
-    
-    return response()->json(['message'=>'berhasil di input']);
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'berhasil di input'
+        ]);
     }
 
-    
-    public function login(Request $request)
-        {
-            $credentials = $request->only('username', 'password');
-             try {
-                if(! $token = JWTAuth::attempt($credentials))
-         {
-                    return response()->json(['error' => 'invalid_credentials'], 400);
-        }
-            } catch (JWTException $e) {
 
-                    return response()->json(['error' => 'could_not_create_token', 500]);
+    public function login(Request $request)
+    {
+        $credentials = $request->only('username', 'password');
+        try {
+            if (!$token = JWTAuth::attempt($credentials)) {
+                return response()->json(['error' => 'invalid_credentials'], 400);
+            }
+        } catch (JWTException $e) {
+
+            return response()->json(['error' => 'could_not_create_token', 500]);
         }
- 
+
         //     $data = [
         //     'token' => $token,
         //     'user' => JWTAuth::user()
         // ];
 
         $user = JWTAuth::user();
-		
-		return response()->json([
-			'success' => true,
-			'message' => 'login berhasil',
-			'token' => $token,
-			'user'  => $user
-		]);
+        $outlet = DB::table('outlet')->where('id_outlet', $user->id_outlet)->first();
 
- }
+        return response()->json([
+            'success' => true,
+            'message' => 'login berhasil',
+            'token' => $token,
+            'user'  => $user,
+            'outlet' => $outlet,
+        ]);
+    }
+    public function getUser()
+    {
+        $user = JWTAuth::user();
+        return response()->json($user);
+    }
+
+    public function getAll()
+    {
+        $data = DB::table('users')->join('outlet', 'users.id_outlet', '=', 'outlet.id_outlet')
+            ->select('users.*', 'outlet.nama_outlet')
+            ->get();
+
+        return response()->json($data);
+    }
+
+    public function getById($id)
+    {
+        $user = User::where('id', '=', $id)->first();
+
+        return response()->json($user);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'role' => 'required',
+            'name' => 'required',
+            'id_outlet' => 'required'
+        ]);
+
+        $user = User::where('id', '=', $id)->first();
+
+        $user->name = $request->name;
+        $user->username = $request->username;
+        $user->role = $request->role;
+        $user->id_outlet = $request->id_outlet;
+        if ($request->password != null) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data user berhasil diubah'
+        ]);
+    }
+
+    public function delete($id)
+    {
+        $user = User::where('id', '=', $id)->delete();
+
+        if ($user) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data user berhasil dihapus'
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data user gagal dihapus'
+            ]);
+        }
+    }
+
 
 
     public function getAuthenticatedUser()
- {
-    try
- {
-    if (! $user = JWTAuth::parseToken()->authenticate()) {
-        return response()->json(['user_not_found'], 404);
-    }
-     }
-    catch (TokenExpiredException $e)
+	{
+		try {
+			if (!$user = JWTAuth::parseToken()->authenticate()) {
+				return response()->json(['message' => 'Invalid Token']);
+			}
+		} catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+			return response()->json(['message' => 'Token expired!']);
+		} catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+			return response()->json(['message' => 'Invalid Token!']);
+		} catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+			return response()->json(['message' => 'Token Absent']);
+		}
+
+		return response()->json([
+			'success' => true,
+			'message' => 'Success']);
+	}
+
+
+    public function logout(Request $request)
     {
-        return response()->json(['message' => 'token_expired']);
+        if (JWTAuth::invalidate(JWTAuth::getToken())) {
+            return response()->json(['message' => 'anda sudah logout']);
+        } else {
+            return response()->json(['message' => 'gagal logout']);
+        }
     }
-    catch (TokenInvalidException $e)
-     {
-        return response()->json(['message' => 'token_invalid']);
-     }
-    catch (JWTException $e)
-     {
-        return response()->json(['message'=>'token_absent']);
-     }
-        return response()->json(compact('user'));
-    }
-
- public function logout(Request $request)
- {
-     if(JWTAuth::invalidate(JWTAuth::getToken())){
-         return response()->json(['message'=>'anda sudah logout']);
-     } else {
-         return response()->json(['message'=>'gagal logout']);
-
-     }
- }
 }

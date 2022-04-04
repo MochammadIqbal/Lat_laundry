@@ -46,7 +46,10 @@ class DetilTransaksiController extends Controller
 
         $data = DetilTransaksiModel::where('id_detail_transaksi', '=', $detail->id_detail_transaksi)->first();
 
-        return response()->json(['message' => 'Berhasil tambah detil transaksi', 'data' => $data]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Berhasil tambah detil transaksi',
+            'data' => $data]);
     }
 
     public function getById($id)
@@ -61,7 +64,7 @@ class DetilTransaksiController extends Controller
 
     public function getTotal($id_detail)
     {
-        $total = DetilTransaksiModel::where('id_detail_transaksi', $id_detail)->sum('subtotal');
+        $total = DetilTransaksiModel::where('id_transaksi', $id_detail)->sum('subtotal');
         
         return response()->json([
             'total' => $total

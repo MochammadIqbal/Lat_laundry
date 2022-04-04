@@ -10,5 +10,5 @@ class OutletModel extends Model
     protected $primaryKey = 'id_outlet';
     protected $table = 'outlet';
 
-    protected $fillable = ['nama', 'alamat'];
+    protected $fillable = ['nama_outlet', 'alamat'];
 }

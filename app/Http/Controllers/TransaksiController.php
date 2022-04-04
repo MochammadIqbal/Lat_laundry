@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\TransaksiModel;
 use App\Models\DetilTransaksiModel;
+use App\Models\User;
 use Carbon\Carbon;
 // use JWTAuth;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -39,14 +40,17 @@ class TransaksiController extends Controller
         $transaksi->batas_waktu = Carbon::now()->addDays(3);
         $transaksi->status = 'baru';
         $transaksi->dibayar = 'belum dibayar';
-        $transaksi->subtotal = NULL;
+        //$transaksi->subtotal = NULL;
         $transaksi->id = $this->user->id;
 
         $transaksi->save();
 
         $data = TransaksiModel::where('id_transaksi', '=', $transaksi->id_transaksi)->first();
 
-        return response()->json(['message' => 'Data transaksi berhasil ditambahkan', 'data' => $data]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Data transaksi berhasil ditambahkan',
+            'data' => $data]);
     }
     public function getAll()
     {
@@ -104,13 +108,13 @@ class TransaksiController extends Controller
     
     public function bayar($id)
     {
-        $transaksi = TransaksiModel::where('id', '=', $id)->first();
+        $transaksi = TransaksiModel::where('id_transaksi', '=', $id)->first();
         $total = DetilTransaksiModel::where('id_transaksi', $id)->sum('subtotal');
 
         $transaksi->tgl_bayar = Carbon::now();
         $transaksi->status = "diambil";
         $transaksi->dibayar = "dibayar";
-        $transaksi->total_bayar = $total;        
+        $transaksi->total = $total;        
         
         $transaksi->save();
         
@@ -130,14 +134,19 @@ class TransaksiController extends Controller
 
         $tahun = $request->tahun;
         $bulan = $request->bulan;
+
+        $id_user = $this->user->id;
+        $data_user = User::where('id', '=', $id_user)->first();
         
         $data = DB::table('transaksi')->join('member', 'transaksi.id_member', '=', 'member.id_member')
-                    ->select('transaksi.id_transaksi','transaksi.tgl_order','transaksi.tgl_bayar','transaksi.subtotal', 'member.nama')
-                    ->whereYear('tgl_order', '=' , $tahun)
-                    ->whereMonth('tgl_order', '=', $bulan)
-                    ->get();
+            ->join('users', 'transaksi.id', '=', 'users.id')
+            ->select('transaksi.id', 'member.nama', 'transaksi.tgl_order', 'transaksi.tgl_bayar', 'transaksi.total', 'users.name')
+            ->where('users.id_outlet', $data_user->id_outlet)
+            ->whereYear('transaksi.tgl_order', '=', $tahun)
+            ->whereMonth('transaksi.tgl_order', '=', $bulan)
+            ->get();
 
         return response()->json($data);
     }
 
-} 
+}

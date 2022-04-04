@@ -32,6 +32,7 @@ class MemberController extends Controller
     $data = MemberModel::where('id_member','=', $member->id_member)->first();
 
     return response()->json([
+        'success' => true,
         'message' => 'Data member berhasil diinput',
         'data' => $data   
     ]);
@@ -48,8 +49,7 @@ class MemberController extends Controller
         return response()->json($data);
     }
     public function getById($id_member){
-        $data= MemberModel::where('id_member','=', $id_member)->get();
-
+        $data = MemberModel::where('id_member', $id_member)->first();
         return response()->json($data);
     }
 
@@ -84,9 +84,13 @@ class MemberController extends Controller
         $delete = MemberModel::where('id_member','=',$id_member)->delete();
 
         if($delete) {
-            return response()->json(['message'=>'Berhasil dihapus']);
+            return response()->json([
+                'success'=> true,
+                'message'=>'Berhasil dihapus']);
         } else {
-            return response()->json(['message'=>'Gagal dihapus']);
+            return response()->json([
+                'success'=> true,
+                'message'=>'Gagal dihapus']);
 
         }
     }
